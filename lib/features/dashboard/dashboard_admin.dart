@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:alat_1/features/pengguna/pengguna.dart';
 
-class DashboardAdmin extends StatelessWidget {
+class DashboardAdmin extends StatefulWidget {
   const DashboardAdmin({super.key});
+
+  @override
+  State<DashboardAdmin> createState() => _DashboardAdminState();
+}
+
+class _DashboardAdminState extends State<DashboardAdmin> {
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +20,6 @@ class DashboardAdmin extends StatelessWidget {
       body: SafeArea(
         child: Stack(
           children: [
-
             /// BACKGROUND HEADER
             Container(
               height: 220,
@@ -30,7 +37,6 @@ class DashboardAdmin extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   const SizedBox(height: 30),
 
                   /// TITLE
@@ -107,25 +113,21 @@ class DashboardAdmin extends StatelessWidget {
                     mainAxisSpacing: 15,
                     childAspectRatio: 1.4,
                     children: const [
-
                       _StatCard(
                         number: "5",
                         label: "Pengguna",
                         icon: Icons.person,
                       ),
-
                       _StatCard(
                         number: "3",
                         label: "Aktivitas",
                         icon: Icons.history,
                       ),
-
                       _StatCard(
                         number: "3",
                         label: "Alat",
                         icon: Icons.build,
                       ),
-
                       _StatCard(
                         number: "4",
                         label: "Peminjaman",
@@ -144,9 +146,24 @@ class DashboardAdmin extends StatelessWidget {
 
       /// BOTTOM NAVIGATION
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
         selectedItemColor: primaryColor,
         unselectedItemColor: Colors.black,
         type: BottomNavigationBarType.fixed,
+        onTap: (index) {
+          if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PenggunaPage(),
+              ),
+            );
+          } else {
+            setState(() {
+              _currentIndex = index;
+            });
+          }
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -177,7 +194,6 @@ class DashboardAdmin extends StatelessWidget {
     );
   }
 
-  /// BAR GRAFIK SEDERHANA
   Widget _buildBar(double value) {
     return Align(
       alignment: Alignment.centerLeft,
