@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:alat_1/features/pengguna/tambah_pengguna.dart';
+import 'package:alat_1/features/pengguna/edit_pengguna.dart';
+
 
 class PenggunaPage extends StatefulWidget {
   const PenggunaPage({super.key});
@@ -155,23 +158,28 @@ class _PenggunaPageState extends State<PenggunaPage> {
 
   Widget _buildAddButton(Color color) {
     return Padding(
-      padding: const EdgeInsets.only(right: 25.0, bottom: 10),
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: ElevatedButton(
-          onPressed: () {
-            // Logika navigasi ke halaman Tambah User
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color,
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-          child: const Text('Tambah', style: TextStyle(color: Colors.white)),
+    padding: const EdgeInsets.only(right: 25.0, bottom: 10),
+    child: Align(
+      alignment: Alignment.centerRight,
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const TambahPenggunaPage(),
+            ),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
+        child: const Text('Tambah', style: TextStyle(color: Colors.white)),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildBottomNav() {
     return Align(
