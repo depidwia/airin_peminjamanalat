@@ -130,7 +130,7 @@ class PeminjamanPage extends StatelessWidget {
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, py: 5),
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(color: Color(0xFF4A657A), borderRadius: BorderRadius.circular(5)),
             child: Text(data['status']!, style: TextStyle(color: Colors.white, fontSize: 10)),
           )

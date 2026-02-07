@@ -20,6 +20,7 @@ class _LoginPageState extends State<LoginPage> {
 
   String? emailError;
   String? passwordError;
+  
 
   Future<void> login() async {
     setState(() {
@@ -64,7 +65,8 @@ class _LoginPageState extends State<LoginPage> {
       final data = await Supabase.instance.client
           .from('users')
           .select('role')
-          .eq('id', user.id)
+          .eq('id_user', user.id)
+
           .maybeSingle();
 
       if (data == null) {

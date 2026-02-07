@@ -15,39 +15,50 @@ class _TambahPenggunaPageState extends State<TambahPenggunaPage> {
   
   String? _selectedPosisi;
   bool _isPasswordVisible = false;
-  final List<String> _posisiOptions = ['Petugas', 'Admin', 'Peminjam'];
+  final List<String> _posisiOptions = ['petugas', 'admin', 'peminjam'];
 
   final supabase = Supabase.instance.client;
+  
 
   // Fungsi untuk menyimpan data ke Supabase
-  Future<void> tambahUser() async {
-    if (_namaController.text.isEmpty || _emailController.text.isEmpty || _selectedPosisi == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Semua field harus diisi!')),
-      );
-      return;
-    }
-
-    try {
-      await supabase.from('users').insert({
-        'nama': _namaController.text,
-        'email': _emailController.text,
-        'password': _passwordController.text, // Catatan: Sebaiknya gunakan Auth Supabase untuk keamanan
-        'role': _selectedPosisi,
-      });
-
-      if (mounted) {
-        Navigator.pop(context); // Kembali ke halaman daftar pengguna
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pengguna berhasil ditambahkan')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan: $e')),
-      );
-    }
+Future<void> tambahUser() async {
+  if (_namaController.text.isEmpty ||
+      _emailController.text.isEmpty ||
+      _passwordController.text.isEmpty ||
+      _selectedPosisi == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Semua field harus diisi!')),
+    );
+    return;
   }
+
+  try {
+    final response = await supabase.functions.invoke(
+      'create-user', // nama edge function kamu
+      body: {
+        "email": _emailController.text.trim(),
+        "password": _passwordController.text.trim(),
+        "nama": _namaController.text.trim(),
+        "role": _selectedPosisi,
+      },
+    );
+
+    if (response.status != 200) {
+      throw Exception(response.data);
+    }
+
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pengguna berhasil ditambahkan')),
+      );
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {

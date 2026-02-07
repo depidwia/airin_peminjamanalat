@@ -39,7 +39,8 @@ class _EditPenggunaPageState extends State<EditPenggunaPage> {
         'email': _emailController.text,
         'password': _passwordController.text,
         'role': _selectedPosisi,
-      }).eq('id_user', widget.user['id_user']);
+      }).eq('id_user', int.parse(widget.user['id_user'].toString()));
+
 
       if (mounted) {
         Navigator.pop(context);

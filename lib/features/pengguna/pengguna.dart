@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:alat_1/features/pengguna/tambah_pengguna.dart';
+import 'package:alat_1/features/pengguna/edit_pengguna.dart';
 
 class PenggunaPage extends StatefulWidget {
   const PenggunaPage({super.key});
@@ -13,9 +15,12 @@ class _PenggunaPageState extends State<PenggunaPage> {
 
   // Stream untuk sinkronisasi data Realtime dengan Supabase
   final Stream<List<Map<String, dynamic>>> _usersStream =
-      Supabase.instance.client
-          .from('users')
-          .stream(primaryKey: ['id_user']);
+    Supabase.instance.client
+        .from('users')
+        .stream(primaryKey: ['id_user']);
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -89,16 +94,24 @@ class _PenggunaPageState extends State<PenggunaPage> {
   }
 
   // --- LOGIKA SUPABASE ---
-  Future<void> deleteUser(String idUser) async {
-    try {
-      await supabase.from('users').delete().eq('id_user', idUser);
+  
+Future<void> deleteUser(String idUser) async {
+  try {
+    await supabase
+        .from('users')
+        .delete()
+        .eq('id_user', idUser);
+
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('User berhasil dihapus')),
       );
-    } catch (e) {
-      print("Error deleting: $e");
     }
+  } catch (e) {
+    print("Error deleting: $e");
   }
+}
+
 
   // --- WIDGET KOMPONEN ---
 
@@ -154,24 +167,32 @@ class _PenggunaPageState extends State<PenggunaPage> {
   }
 
   Widget _buildAddButton(Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 25.0, bottom: 10),
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: ElevatedButton(
-          onPressed: () {
-            // Logika navigasi ke halaman Tambah User
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color,
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-          child: const Text('Tambah', style: TextStyle(color: Colors.white)),
+  return Padding(
+    padding: const EdgeInsets.only(right: 25.0, bottom: 10),
+    child: Align(
+      alignment: Alignment.centerRight,
+      child: ElevatedButton(
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const TambahPenggunaPage(),
+            ),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8)),
         ),
+        child: const Text('Tambah',
+            style: TextStyle(color: Colors.white)),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildBottomNav() {
     return Align(
@@ -243,9 +264,20 @@ class _PenggunaPageState extends State<PenggunaPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              actionButton('Edit', btnColor, () {
-                // Navigasi ke Edit
-              }),
+              actionButton('Edit', btnColor, () async {
+  await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => EditPenggunaPage(user: {
+        'id_user': idUser,
+        'nama': nama,
+        'email': email,
+        'role': role,
+      }),
+    ),
+  );
+}),
+
               const SizedBox(width: 10),
               actionButton('Hapus', btnColor, () => deleteUser(idUser)),
             ],
