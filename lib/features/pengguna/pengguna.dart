@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PenggunaPage extends StatefulWidget {
-  const PenggunaPage({super.key});
+  PenggunaPage({super.key});
 
   @override
   State<PenggunaPage> createState() => _PenggunaPageState();
@@ -20,7 +20,11 @@ class _PenggunaPageState extends State<PenggunaPage> {
   }
 
   Future<void> fetchUsers() async {
-    final data = await supabase.from('users').select().order('role');
+    final data = await supabase
+        .from('users')
+        .select()
+        .order('role', ascending: true);
+
     setState(() {
       users = data;
       loading = false;
@@ -32,65 +36,7 @@ class _PenggunaPageState extends State<PenggunaPage> {
     fetchUsers();
   }
 
-  void showForm({Map? user}) {
-    final nama = TextEditingController(text: user?['nama']);
-    final email = TextEditingController(text: user?['email']);
-    String role = user?['role'] ?? 'Peminjam';
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(user == null ? 'Tambah Pengguna' : 'Edit Pengguna'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nama,
-              decoration: const InputDecoration(labelText: 'Nama'),
-            ),
-            TextField(
-              controller: email,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            DropdownButtonFormField(
-              value: role,
-              items: ['Admin', 'Petugas', 'Peminjam']
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              onChanged: (val) => role = val!,
-              decoration: const InputDecoration(labelText: 'Role'),
-            )
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (user == null) {
-                await supabase.from('users').insert({
-                  'nama': nama.text,
-                  'email': email.text,
-                  'role': role,
-                });
-              } else {
-                await supabase.from('users').update({
-                  'nama': nama.text,
-                  'email': email.text,
-                  'role': role,
-                }).eq('id', user['id']);
-              }
-              Navigator.pop(context);
-              fetchUsers();
-            },
-            child: const Text('Simpan'),
-          ),
-        ],
-      ),
-    );
-  }
+  // ================= UI =================
 
   @override
   Widget build(BuildContext context) {
@@ -98,132 +44,185 @@ class _PenggunaPageState extends State<PenggunaPage> {
       backgroundColor: const Color(0xFFF2F4F6),
       body: Column(
         children: [
-          // HEADER
+          // ================= HEADER =================
           Container(
-            padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
             width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 26),
             decoration: const BoxDecoration(
               color: Color(0xFF3E5C6E),
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(24),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(28),
+                bottomRight: Radius.circular(28),
               ),
             ),
-            child: const Text(
-              'PENGGUNA',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
-          // SEARCH
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search),
-                hintText: 'Cari Pengguna',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'PENGGUNA',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
                 ),
-              ),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Icon(Icons.person,
+                      color: Colors.white, size: 20),
+                ),
+              ],
             ),
           ),
 
-          // LIST USER
+          // ================= SEARCH =================
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.search, color: Colors.grey),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Cari Pengguna',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ================= LIST =================
           Expanded(
             child: loading
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: users.length,
-                    itemBuilder: (context, i) {
-                      final user = users[i];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD9E0E6),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.person, size: 40),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    user['role'],
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(user['nama']),
-                                  Text(user['email']),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              children: [
-                                SizedBox(
-                                  width: 70,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          const Color(0xFF3E5C6E),
-                                      padding: EdgeInsets.zero,
-                                    ),
-                                    onPressed: () =>
-                                        showForm(user: user),
-                                    child: const Text('Edit',
-                                        style: TextStyle(fontSize: 12)),
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                SizedBox(
-                                  width: 70,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                      padding: EdgeInsets.zero,
-                                    ),
-                                    onPressed: () =>
-                                        deleteUser(user['id']),
-                                    child: const Text('Hapus',
-                                        style: TextStyle(fontSize: 12)),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      );
+                    itemBuilder: (context, index) {
+                      final user = users[index];
+                      return _userCard(user);
                     },
                   ),
           ),
 
-          // TOMBOL TAMBAH
+          // ================= BUTTON TAMBAH =================
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(bottom: 16),
             child: SizedBox(
-              width: double.infinity,
+              width: 120,
+              height: 36,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3E5C6E),
+                  elevation: 3,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () => showForm(),
-                child: const Text('Tambah'),
+                onPressed: () {},
+                child: const Text(
+                  'Tambah',
+                  style: TextStyle(fontSize: 14),
+                ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= USER CARD =================
+  Widget _userCard(Map user) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFD9E0E6),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.person, size: 42),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user['role'],
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  user['nama'],
+                  style: const TextStyle(fontSize: 13),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  user['email'],
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            children: [
+              SizedBox(
+                width: 72,
+                height: 28,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3E5C6E),
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  onPressed: () {},
+                  child: const Text(
+                    'Edit',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              SizedBox(
+                width: 72,
+                height: 28,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  onPressed: () => deleteUser(user['id']),
+                  child: const Text(
+                    'Hapus',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
