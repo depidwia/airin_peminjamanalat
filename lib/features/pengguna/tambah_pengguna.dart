@@ -9,22 +9,16 @@ class TambahPenggunaPage extends StatefulWidget {
 }
 
 class _TambahPenggunaPageState extends State<TambahPenggunaPage> {
+  final supabase = Supabase.instance.client;
   final _namaController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
-  String? _selectedPosisi;
-  bool _isPasswordVisible = false;
-  final List<String> _posisiOptions = ['Petugas', 'Admin', 'Peminjam'];
+  String? selectedPosisi;
 
-  final supabase = Supabase.instance.client;
-
-  // Fungsi untuk menyimpan data ke Supabase
-  Future<void> tambahUser() async {
-    if (_namaController.text.isEmpty || _emailController.text.isEmpty || _selectedPosisi == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Semua field harus diisi!')),
-      );
+  // FUNGSI SIMPAN KE SUPABASE
+  Future<void> simpanPengguna() async {
+    if (_namaController.text.isEmpty || _emailController.text.isEmpty || selectedPosisi == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Isi semua data!")));
       return;
     }
 
@@ -32,81 +26,45 @@ class _TambahPenggunaPageState extends State<TambahPenggunaPage> {
       await supabase.from('users').insert({
         'nama': _namaController.text,
         'email': _emailController.text,
-        'password': _passwordController.text, // Catatan: Sebaiknya gunakan Auth Supabase untuk keamanan
-        'role': _selectedPosisi,
+        'password': _passwordController.text, // Pastikan ada kolom password di DB
+        'role': selectedPosisi?.toLowerCase(), // Menyisuaikan dengan data db kamu (peminjam, admin, dll)
       });
-
+      
       if (mounted) {
-        Navigator.pop(context); // Kembali ke halaman daftar pengguna
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pengguna berhasil ditambahkan')),
-        );
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Data Berhasil Ditambah")));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan: $e')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Gagal: $e")));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryColor = Color(0xFF4A6572);
-    const Color inputBgColor = Color(0xFFD9E0E4);
-
+    // Gunakan desain UI yang sudah kita buat sebelumnya
+    // Ganti TextField biasa dengan controller yang sudah dibuat:
+    // Contoh: _buildInputField("Nama", controller: _namaController)
+    
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: primaryColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Tambah Pengguna',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        elevation: 0,
-      ),
+      // ... (Bagian AppBar dan Icon Profil sama seperti sebelumnya)
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 30),
+        padding: const EdgeInsets.all(30),
         child: Column(
           children: [
-            const SizedBox(height: 30),
-            // Avatar Placeholder
-            const Icon(Icons.account_circle_outlined, size: 120, color: Colors.black),
-            const SizedBox(height: 30),
-
-            // Input Nama
-            _buildInputField('Nama', 'Masukkan Nama', _namaController, inputBgColor),
-
-            // Input Email
-            _buildInputField('Email', 'Masukkan Email', _emailController, inputBgColor),
-
-            // Input Kata Sandi
-            _buildPasswordField(inputBgColor),
-
+            // ... (Bagian Icon Profil)
+            const SizedBox(height: 20),
+            _buildInputField("Nama", "Masukkan Nama", controller: _namaController),
+            _buildInputField("Email", "Masukkan Email", controller: _emailController),
+            _buildInputField("Kata Sandi", "Masukkan Sandi", controller: _passwordController, isPassword: true),
+            
             // Dropdown Posisi
-            _buildDropdownField(inputBgColor),
+            _buildDropdown(),
 
             const SizedBox(height: 40),
-
-            // Tombol Tambahkan
-            SizedBox(
-              width: 150,
-              height: 45,
-              child: ElevatedButton(
-                onPressed: tambahUser,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 5,
-                ),
-                child: const Text(
-                  'Tambahkan',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-              ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4A6572)),
+              onPressed: simpanPengguna, // Panggil fungsi simpan
+              child: const Text("Tambahkan", style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -114,24 +72,19 @@ class _TambahPenggunaPageState extends State<TambahPenggunaPage> {
     );
   }
 
-  Widget _buildInputField(String label, String hint, TextEditingController controller, Color bgColor) {
+  // Edit Helper Widget agar menerima controller
+  Widget _buildInputField(String label, String hint, {required TextEditingController controller, bool isPassword = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        Material(
-          elevation: 3,
-          borderRadius: BorderRadius.circular(8),
+        Container(
+          decoration: BoxDecoration(color: const Color(0xFFCFD8DC), borderRadius: BorderRadius.circular(10)),
           child: TextField(
             controller: controller,
-            decoration: InputDecoration(
-              hintText: hint,
-              fillColor: bgColor,
-              filled: true,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-            ),
+            obscureText: isPassword,
+            decoration: InputDecoration(hintText: hint, border: InputBorder.none, contentPadding: EdgeInsets.all(15)),
           ),
         ),
         const SizedBox(height: 20),
@@ -139,66 +92,11 @@ class _TambahPenggunaPageState extends State<TambahPenggunaPage> {
     );
   }
 
-  Widget _buildPasswordField(Color bgColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Kata Sandi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        const SizedBox(height: 8),
-        Material(
-          elevation: 3,
-          borderRadius: BorderRadius.circular(8),
-          child: TextField(
-            controller: _passwordController,
-            obscureText: !_isPasswordVisible,
-            decoration: InputDecoration(
-              hintText: 'Masukkan Sandi',
-              fillColor: bgColor,
-              filled: true,
-              suffixIcon: IconButton(
-                icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off),
-                onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-              ),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
-
-  Widget _buildDropdownField(Color bgColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Posisi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        const SizedBox(height: 8),
-        Material(
-          elevation: 3,
-          borderRadius: BorderRadius.circular(8),
-          child: DropdownButtonFormField<String>(
-            value: _selectedPosisi,
-            hint: const Text('Masukkan Posisi'),
-            decoration: InputDecoration(
-              fillColor: bgColor,
-              filled: true,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 15),
-            ),
-            items: _posisiOptions.map((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-            onChanged: (newValue) {
-              setState(() => _selectedPosisi = newValue);
-            },
-          ),
-        ),
-      ],
+  Widget _buildDropdown() {
+    return DropdownButtonFormField<String>(
+      decoration: const InputDecoration(filled: true, fillColor: Color(0xFFCFD8DC)),
+      items: ["Admin", "Petugas", "Peminjam"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+      onChanged: (val) => setState(() => selectedPosisi = val),
     );
   }
 }

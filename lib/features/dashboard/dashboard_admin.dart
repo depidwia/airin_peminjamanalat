@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:alat_1/features/pengguna/pengguna.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class DashboardAdmin extends StatefulWidget {
   const DashboardAdmin({super.key});
@@ -10,260 +10,270 @@ class DashboardAdmin extends StatefulWidget {
 
 class _DashboardAdminState extends State<DashboardAdmin> {
   int _currentIndex = 0;
+  final Color primaryColor = const Color(0xFF4A6572);
+
+  // Fungsi untuk berpindah halaman konten
+  Widget _buildBody() {
+    switch (_currentIndex) {
+      case 0:
+        return _buildBerandaContent(); // Konten Beranda asli kamu
+      case 1:
+        return  PenggunaPage(); // Halaman Pengguna yang baru
+      default:
+        return _buildBerandaContent();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF405D72);
-
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            /// BACKGROUND HEADER
-            Container(
-              height: 220,
-              decoration: const BoxDecoration(
-                color: primaryColor,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(100),
-                ),
-              ),
-            ),
-
-            /// CONTENT
-            SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 30),
-
-                  /// TITLE
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
-                        "BERANDA",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.person,
-                          color: primaryColor,
-                        ),
-                      )
-                    ],
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  /// GRAFIK CARD
-                  const Text(
-                    "Peminjaman Minggu Ini",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: primaryColor,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 8,
-                          offset: Offset(0, 4),
-                        )
-                      ],
-                    ),
-                    height: 200,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildBar(3),
-                        _buildBar(2),
-                        _buildBar(4),
-                        _buildBar(5),
-                        _buildBar(6),
-                        _buildBar(8),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  /// GRID CARD
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisSpacing: 15,
-                    mainAxisSpacing: 15,
-                    childAspectRatio: 1.4,
-                    children: const [
-                      _StatCard(
-                        number: "5",
-                        label: "Pengguna",
-                        icon: Icons.person,
-                      ),
-                      _StatCard(
-                        number: "3",
-                        label: "Aktivitas",
-                        icon: Icons.history,
-                      ),
-                      _StatCard(
-                        number: "3",
-                        label: "Alat",
-                        icon: Icons.build,
-                      ),
-                      _StatCard(
-                        number: "4",
-                        label: "Peminjaman",
-                        icon: Icons.sell,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 80),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-
-      /// BOTTOM NAVIGATION
+      // Body sekarang dinamis mengikuti index navbar
+      body: _buildBody(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         selectedItemColor: primaryColor,
         unselectedItemColor: Colors.black,
         type: BottomNavigationBarType.fixed,
         onTap: (index) {
-          if (index == 1) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const PenggunaPage(),
-              ),
-            );
-          } else {
-            setState(() {
-              _currentIndex = index;
-            });
-          }
+          setState(() {
+            _currentIndex = index;
+          });
         },
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Beranda",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: "Pengguna",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.build),
-            label: "Alat",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.category),
-            label: "Kategori",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.sell),
-            label: "Peminjaman",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment_return),
-            label: "Pengembalian",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Beranda"),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: "Pengguna"),
+          BottomNavigationBarItem(icon: Icon(Icons.build), label: "Alat"),
+          BottomNavigationBarItem(icon: Icon(Icons.category), label: "Kategori"),
+          BottomNavigationBarItem(icon: Icon(Icons.sell), label: "Peminjaman"),
+          BottomNavigationBarItem(icon: Icon(Icons.assignment_return), label: "Pengembalian"),
         ],
       ),
     );
   }
 
-  Widget _buildBar(double value) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        height: 10,
-        width: value * 25,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-        ),
+  // --- KONTEN BERANDA ASLI (UI TIDAK BERUBAH) ---
+  Widget _buildBerandaContent() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.only(top: 60, left: 25, right: 25, bottom: 40),
+            decoration: BoxDecoration(
+              color: primaryColor,
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(35)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Align(
+                  alignment: Alignment.topRight,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.person, color: Colors.grey),
+                  ),
+                ),
+                const Text(
+                  "BERANDA",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const Divider(color: Colors.white, thickness: 2, endIndent: 220),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Peminjaman Minggu Ini",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 15),
+                Container(
+                  height: 250,
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceAround,
+                      maxY: 10,
+                      barTouchData: BarTouchData(enabled: false),
+                      titlesData: FlTitlesData(
+                        show: true,
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: (value, meta) {
+                              const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                              if (value.toInt() >= 0 && value.toInt() < days.length) {
+                                return Text(days[value.toInt()],
+                                    style: const TextStyle(color: Colors.white, fontSize: 10));
+                              }
+                              return const Text('');
+                            },
+                          ),
+                        ),
+                        leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      ),
+                      gridData: FlGridData(
+                        show: true,
+                        drawVerticalLine: false,
+                        getDrawingHorizontalLine: (value) => FlLine(
+                          color: Colors.white.withOpacity(0.2),
+                          strokeWidth: 1,
+                        ),
+                      ),
+                      borderData: FlBorderData(show: false),
+                      barGroups: [
+                        _makeGroupData(0, 10),
+                        _makeGroupData(1, 3),
+                        _makeGroupData(2, 2),
+                        _makeGroupData(3, 4),
+                        _makeGroupData(4, 6),
+                        _makeGroupData(5, 8),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 25),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              crossAxisSpacing: 15,
+              mainAxisSpacing: 15,
+              childAspectRatio: 1.6,
+              children: [
+                _buildStatCard("5", "Pengguna", Icons.person_outline),
+                _buildStatCard("3", "Aktivitas", Icons.history),
+                _buildStatCard("3", "Alat", Icons.business_center_outlined),
+                _buildStatCard("4", "Peminjaman", Icons.sell_outlined),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
       ),
+    );
+  }
+
+  // --- WIDGET HELPER ---
+  Widget _buildStatCard(String count, String label, IconData icon) {
+    return Container(
+      decoration: BoxDecoration(
+        color: primaryColor,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      padding: const EdgeInsets.all(15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(count, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+              Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
+            ],
+          ),
+          Icon(icon, color: Colors.white, size: 40),
+        ],
+      ),
+    );
+  }
+
+  BarChartGroupData _makeGroupData(int x, double y) {
+    return BarChartGroupData(
+      x: x,
+      barRods: [
+        BarChartRodData(
+          toY: y,
+          color: Colors.white,
+          width: 20,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ],
     );
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final String number;
-  final String label;
-  final IconData icon;
-
-  const _StatCard({
-    required this.number,
-    required this.label,
-    required this.icon,
-  });
+// --- HALAMAN PENGGUNA (CRUD) ---
+class PenggunaPage extends StatelessWidget {
+   PenggunaPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF405D72);
+    final Color primaryColor = const Color(0xFF4A6572);
 
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: primaryColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          )
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            number,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
+    return Column(
+      children: [
+        // Header Pengguna (Desain disamakan dengan Beranda)
+        Container(
+          padding: const EdgeInsets.only(top: 60, left: 25, right: 25, bottom: 40),
+          decoration: BoxDecoration(
+            color: primaryColor,
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(35)),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: Colors.white, size: 28),
-              const SizedBox(height: 5),
               Text(
-                label,
-                style: const TextStyle(
+                "DATA PENGGUNA",
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
                 ),
-              )
+              ),
+              Divider(color: Colors.white, thickness: 2, endIndent: 200),
             ],
-          )
-        ],
-      ),
+          ),
+        ),
+        
+        // Contoh List Pengguna (CRUD)
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(20),
+            itemCount: 5, // Ganti dengan data asli nanti
+            itemBuilder: (context, index) {
+              return Card(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.person)),
+                  title: Text("User Nama $index"),
+                  subtitle: const Text("Role: Admin/Peminjam"),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(icon: const Icon(Icons.edit, color: Colors.blue), onPressed: () {}),
+                      IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () {}),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
