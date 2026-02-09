@@ -1,191 +1,248 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-class DashboardPeminjam extends StatefulWidget {
-  const DashboardPeminjam({super.key});
+import 'package:alat_1/features/alat_peminjam/alatpinjam.dart';
+import 'package:alat_1/features/pinjam_peminjam/pinjam.dart';
+import 'package:alat_1/features/pengajuan_peminjam/pengajuan.dart';
+import 'package:alat_1/features/kembali_peminjam/kembali.dart';
 
-  @override
-  State<DashboardPeminjam> createState() => _DashboardPeminjamState();
-}
+class DashboardPeminjamPage extends StatelessWidget {
+  const DashboardPeminjamPage({super.key}); 
 
-class _DashboardPeminjamState extends State<DashboardPeminjam> {
-  final supabase = Supabase.instance.client;
+  
 
-  // Fungsi logout yang aman
-  Future<void> signOut() async {
-    await supabase.auth.signOut();
-    if (!mounted) return;
-    Navigator.pushReplacementNamed(context, '/login'); 
+  void _onNavTap(BuildContext context, int index) {
+    if (index == 0) return;
+
+    Widget targetPage;
+
+    switch (index) {
+      case 1:
+        targetPage = const AlatPinjamPage();
+        break;
+      case 2:
+        targetPage = const PinjamPage();
+        break;
+      case 3:
+        targetPage = const PengajuanPage();
+        break;
+      case 4:
+        targetPage = const PengembalianPeminjamPage();
+        break;
+      default:
+        return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => targetPage),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE5B5B5), // Warna background sesuai desain
+      backgroundColor: const Color(0xFFF2F4F6),
       body: SafeArea(
         child: Column(
           children: [
-            // --- HEADER SECTION ---
+            // ===== HEADER =====
             Container(
-              padding: const EdgeInsets.all(25),
+              padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
-                color: Color(0xFFD48F9F), // Warna pink gelap header
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(35)),
+                color: Color(0xFF3F5F73),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "KulinaRent",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        "Dashboard Peminjam",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                      ),
-                    ],
+                  const Text(
+                    'Peminjam',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  IconButton(
-                    onPressed: signOut,
-                    icon: const Icon(Icons.account_circle, size: 35, color: Colors.black87),
-                  )
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.person, color: Color(0xFF3F5F73)),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // ===== STATISTIC =====
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.6,
+                physics: const NeverScrollableScrollPhysics(),
+                children: const [
+                  StatCard(title: 'Pengguna Aktif', value: '3'),
+                  StatCard(title: 'Jumlah Alat', value: '10'),
+                  StatCard(title: 'Alat Tersedia', value: '12'),
+                  StatCard(title: 'Alat Dipinjam', value: '7'),
                 ],
               ),
             ),
 
             const SizedBox(height: 20),
 
-            // --- STATISTICS GRID ---
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-                childAspectRatio: 1.3,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  _buildStatCard("Alat Tersedia", "10", Colors.pink),
-                  _buildStatCard("Sedang Dipinjam", "2", Colors.pink),
-                ],
+            // ===== RIWAYAT =====
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Riwayat Peminjaman',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
 
-            const SizedBox(height: 25),
+            const SizedBox(height: 10),
 
-            // --- HISTORY SECTION ---
             Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Riwayat Peminjaman Anda:",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Expanded(
-                      child: ListView(
-                        children: [
-                          _buildHistoryItem("Peminjaman 02", "10.34 20 Januari 2026", true),
-                          _buildHistoryItem("Peminjaman 01", "08.20 15 Januari 2026", true),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: const [
+                  HistoryTile(
+                    initial: 'D',
+                    name: 'Devi Dwi',
+                    date: '10 Januari 2026',
+                  ),
+                  HistoryTile(
+                    initial: 'A',
+                    name: 'Adella W',
+                    date: '10 Januari 2026',
+                  ),
+                  HistoryTile(
+                    initial: 'A',
+                    name: 'Ardiansyah',
+                    date: '10 Januari 2026',
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
-      // --- BOTTOM NAVIGATION BAR ---
+
+      // ===== NAVBAR =====
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFFD48F9F),
+        currentIndex: 0,
+        selectedItemColor: const Color(0xFF3F5F73),
         unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        onTap: (index) => _onNavTap(context, index),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.handyman), label: 'Alat'),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Pengajuan'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Kembali'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Beranda',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.inventory_2),
+            label: 'Alat',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.swap_horiz),
+            label: 'Pinjam',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.assignment),
+            label: 'Pengajuan',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart),
+            label: 'Laporan',
+          ),
         ],
       ),
     );
   }
+}
 
-  // Widget Helper untuk Kartu Statistik
-  Widget _buildStatCard(String title, String count, Color color) {
+// ===== STAT CARD =====
+class StatCard extends StatelessWidget {
+  final String title;
+  final String value;
+
+  const StatCard({
+    super.key,
+    required this.title,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
+        color: const Color(0xFF3F5F73),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Text(title, style: const TextStyle(color: Colors.white70)),
+          const SizedBox(height: 8),
           Text(
-            title,
-            style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            count,
-            style: TextStyle(color: color, fontSize: 28, fontWeight: FontWeight.bold),
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  // Widget Helper untuk Item Riwayat
-  Widget _buildHistoryItem(String title, String date, bool isSuccess) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
+// ===== HISTORY TILE =====
+class HistoryTile extends StatelessWidget {
+  final String initial;
+  final String name;
+  final String date;
+
+  const HistoryTile({
+    super.key,
+    required this.initial,
+    required this.name,
+    required this.date,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        children: [
-          Icon(
-            isSuccess ? Icons.check_circle_outline : Icons.pending_outlined,
-            color: Colors.green,
-            size: 30,
-          ),
-          const SizedBox(width: 15),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.pink),
-              ),
-              Text(
-                date,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-        ],
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: const Color(0xFF3F5F73),
+          child: Text(initial, style: const TextStyle(color: Colors.white)),
+        ),
+        title: Text(name),
+        subtitle: Text(date),
       ),
     );
   }

@@ -75,11 +75,11 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
 
       if (role == 'admin') {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardAdmin()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) =>  DashboardAdmin()));
       } else if (role == 'petugas') {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardPetugas()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) =>  const DashboardPetugasPage()));
       } else if (role == 'peminjam') {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardPeminjam()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) =>  DashboardPeminjamPage()));
       } else {
         _showSnackBar("Role '$role' tidak dikenali", Colors.orange);
       }
